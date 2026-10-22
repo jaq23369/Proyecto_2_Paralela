@@ -1,0 +1,9 @@
+# Hostfile de ejemplo para el cluster de la Parte 2.
+# Los comentarios empiezan con #. Cada linea es la IP de un nodo con sus slots
+# (nucleos a usar) y max_slots (tope fisico, para no pedir mas procesos que
+# nucleos). Cambien las IPs por las que el router les asigne.
+#
+# Nodo maestro, 4 nucleos:
+192.168.1.10 slots=4 max_slots=4
+# Nodo worker, 8 nucleos:
+192.168.1.11 slots=8 max_slots=8
