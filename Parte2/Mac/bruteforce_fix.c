@@ -96,7 +96,8 @@ static int b64_decode(const char *in, int inlen, unsigned char *out){
   int tab[256];
   for(int i=0;i<256;i++) tab[i] = -1;
   for(int i=0;i<64;i++) tab[(unsigned char)T[i]] = i;
-  int val=0, bits=0, n=0;
+  unsigned int val=0;
+  int bits=0, n=0;
   for(int i=0;i<inlen;i++){
     int c = (unsigned char)in[i];
     if(c=='=') break;
@@ -120,8 +121,9 @@ static int leer_texto(const char *ruta, int es_b64, char **datos){
   fclose(f);
   buf[n] = 0;
   if(es_b64){
-    unsigned char *dec = malloc(n);
+    unsigned char *dec = malloc(n + 1);
     int m = b64_decode(buf, (int)n, dec);
+    dec[m] = 0;  // printf("%s") necesita un terminador fuera de los bytes cifrados.
     free(buf);
     *datos = (char*)dec;
     return m;
