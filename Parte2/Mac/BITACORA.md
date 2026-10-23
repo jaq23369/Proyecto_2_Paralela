@@ -87,3 +87,40 @@ Estos puntos dependen de tener las computadoras del equipo conectadas al router,
 - Abrir el firewall de cada sistema para las conexiones entrantes en la red privada.
 - El bloqueo indefinido de MPI cuando detecta las interfaces virtuales de Docker en varias máquinas. Se evita limitando el tráfico a la subred del router con `--mca btl_tcp_if_include` y `--mca oob_tcp_if_include`, como ya se probó local.
 - Para el descifrado cruzado con `--b64` o `--file`, el archivo tiene que estar en la misma ruta en todos los nodos.
+
+## Preparacion Joel / Kevin del 21 de octubre de 2026
+
+Se aplico la preparacion indicada en el README_JOEL recibido en Downloads.
+El repositorio aun no incluia `mpi_prueba.c`, inicio con llaves automaticas ni
+hostfile LAN; se agregaron esos componentes y se reconstruyo la imagen.
+Tambien se incluyo el cifrado del Grupo 9 en la imagen, `iproute2` para
+diagnostico y el terminador de la lectura Base64. El acumulador del decodificador
+paso a unsigned para evitar desbordamiento de un entero con signo.
+
+Estado observado en esta sesion:
+
+| Prueba | Resultado real |
+|---|---|
+| Version de Docker Desktop | 4.96.2; Engine 29.9.2, arm64, 14 CPU disponibles |
+| IP y mascara de en0 | 10.100.5.109, 255.255.224.0; subred 10.100.0.0/19 |
+| Contenedor anterior `mpi_node` | Existia detenido; no se elimino ni modifico |
+| Nuevo `mpi_cluster` | Creado con `--network host --hostname joel-cluster`, en ejecucion |
+| SSH local dentro del nuevo nodo | `ssh -o BatchMode=yes localhost hostname` devuelve `joel-cluster` |
+| Colectivas MPI local con 2 procesos | `MPI_OK: 2 procesos, 1 nodos; token 123456789; suma 3` |
+| Exigir 2 nodos en esa misma prueba local | `MPI_ERROR`, salida 1: no confunde procesos con maquinas distintas |
+| DES con archivo Base64 y llave 1234 | Encuentra `Key = 1234`; el texto recuperado coincide exactamente con `texto_openmpi.txt` |
+| Publica para Kevin | Exportada a `Parte2/.local/joel_cluster.pub`; privada conservada dentro del contenedor |
+| Puerto 22 desde la Mac | Conexion rechazada tanto a 127.0.0.1 como a 10.100.5.109 |
+| Interfaces del nuevo nodo | eth0 192.168.65.3/24, services1 192.168.65.6/32, loopback y bridges 172.x; no aparece la LAN 10.100.0.0/19 |
+
+No se pudo leer la preferencia de host networking por permisos de macOS,
+y el control de aplicaciones no estuvo disponible. Se solicito al usuario
+activar/verificar la opcion en Settings > Resources > Network y aplicar el
+reinicio antes de repetir el acceso desde el host. La ausencia de interfaz LAN
+es ademas la limitacion de Docker Desktop advertida en el README recibido;
+no se ejecuto MPI con un filtro LAN inexistente.
+
+Pendiente: nueva publica `kevin_cluster.pub`, intercambio manual de publicas,
+SSH por puerto 22 entre ambos nodos y comunicacion MPI distribuida. No se
+declara logrado el cluster fisico ni se calcula speedup con estas pruebas.
+Comandos de continuacion en `../PRUEBA_JOEL.md`; logs locales en `../.local/`.

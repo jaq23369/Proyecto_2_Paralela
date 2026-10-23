@@ -14,6 +14,7 @@ El enunciado pide el Dockerfile en la raíz del proyecto. Aquí está en `Parte2
 | `entrypoint.sh` | Arranca el servidor SSH al iniciar el contenedor |
 | `bruteforce_fix.c` | El programa del cluster, con el nombre del nodo en la salida y la lectura de base64 |
 | `cifrar.c` | Cifra un texto y saca base64, para publicarlo a otro equipo |
+| `mpi_prueba.c` | Comprueba colectivas MPI y el numero de nodos distintos |
 | `compat/` | Reemplazo de `rpc/des_crypt.h` con OpenSSL, Ubuntu 22.04 ya no lo trae |
 | `cluster_hosts` | Ejemplo de hostfile con las IPs, slots y max_slots |
 | `texto_openmpi.txt` | El texto del grupo |
@@ -24,6 +25,11 @@ El enunciado pide el Dockerfile en la raíz del proyecto. Aquí está en `Parte2
 ## Requisitos
 
 Docker Desktop 4.34 o superior, con "Enable host networking" en Settings, Resources, Network. Todas las computadoras del equipo en el mismo router.
+
+Para la sesion Joel/Kevin, ver `../PRUEBA_JOEL.md` y `../cluster_hosts.lan`.
+La imagen permanece activa por defecto (`sleep infinity`); para abrir una
+terminal usar `docker exec -it mpi_cluster bash`. El inicio genera una identidad
+SSH por contenedor y autoriza su propia publica para probar `ssh localhost`.
 
 ## 1. Construir la imagen
 
