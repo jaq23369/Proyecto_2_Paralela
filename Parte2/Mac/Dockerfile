@@ -39,6 +39,7 @@ COPY bruteforce_fix.c cifrar.c texto_openmpi.txt cluster_hosts entrypoint.sh ./
 # de la llave es comportamiento indefinido.
 RUN mpicc -O0 -I compat -o bruteforce bruteforce_fix.c compat/des_crypt_openssl.c -lcrypto \
  && gcc  -O0 -I compat -o cifrar     cifrar.c         compat/des_crypt_openssl.c -lcrypto \
+ && sed -i 's/\r$//' entrypoint.sh \
  && chmod +x entrypoint.sh
 
 # El entrypoint arranca el servidor SSH y luego ejecuta lo que se le pida.
