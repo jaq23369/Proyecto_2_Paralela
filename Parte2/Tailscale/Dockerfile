@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y curl ca-certificates iproute2 iptables 
  && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint-ts.sh /proyecto/entrypoint-ts.sh
-RUN chmod +x /proyecto/entrypoint-ts.sh
+RUN sed -i 's/\r$//' /proyecto/entrypoint-ts.sh && chmod +x /proyecto/entrypoint-ts.sh
 
 ENTRYPOINT ["/proyecto/entrypoint-ts.sh"]
 CMD ["/bin/bash"]
