@@ -1,0 +1,4 @@
+# IPs de la sesion del 21/10/2026; confirmar antes de cada prueba.
+# Kevin maestro primero; Joel trabajador segundo. Un proceso por nodo.
+10.100.1.201 slots=1 max_slots=1
+10.100.5.109 slots=1 max_slots=1

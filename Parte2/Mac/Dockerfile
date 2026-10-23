@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     openmpi-bin \
     libopenmpi-dev \
     openssh-server \
+    iproute2 \
     libssl-dev \
  && rm -rf /var/lib/apt/lists/*
 
@@ -32,7 +33,8 @@ WORKDIR /proyecto
 
 # Codigo, texto, reemplazo de DES y archivos de apoyo
 COPY compat/ ./compat/
-COPY bruteforce_fix.c cifrar.c texto_openmpi.txt cluster_hosts entrypoint.sh ./
+COPY bruteforce_fix.c cifrar.c mpi_prueba.c texto_openmpi.txt cluster_hosts entrypoint.sh ./
+COPY cruzado_grupo9/ ./cruzado_grupo9/
 
 # Compilar con el reemplazo de OpenSSL. El binario se llama bruteforce.
 # Va sin optimizacion por el mismo motivo que en la Parte 1, el armado original
@@ -40,8 +42,9 @@ COPY bruteforce_fix.c cifrar.c texto_openmpi.txt cluster_hosts entrypoint.sh ./
 RUN mpicc -O0 -I compat -o bruteforce bruteforce_fix.c compat/des_crypt_openssl.c -lcrypto \
  && gcc  -O0 -I compat -o cifrar     cifrar.c         compat/des_crypt_openssl.c -lcrypto \
  && sed -i 's/\r$//' entrypoint.sh \
+ && mpicc -O2 -Wall -Wextra -o mpi_prueba mpi_prueba.c \
  && chmod +x entrypoint.sh
 
 # El entrypoint arranca el servidor SSH y luego ejecuta lo que se le pida.
 ENTRYPOINT ["/proyecto/entrypoint.sh"]
-CMD ["/bin/bash"]
+CMD ["sleep", "infinity"]
