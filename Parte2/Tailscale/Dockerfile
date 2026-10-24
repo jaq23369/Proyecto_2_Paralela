@@ -1,7 +1,7 @@
 # Capa opcional de Tailscale encima de mpi-cluster-image.
 # Sirve para unir contenedores de computadoras que no estan en la misma red fisica.
 # Primero se construye la imagen base y luego esta:
-#   docker build -t mpi-cluster-image Parte2/Mac
+#   docker build -t mpi-cluster-image Parte2/Imagen
 #   docker build -t mpi-cluster-ts Parte2/Tailscale
 FROM mpi-cluster-image
 

@@ -1,10 +1,10 @@
-# Parte 2, cluster MPI con Docker (versión Mac)
+# Parte 2, cluster MPI con Docker
 
 Esta carpeta lleva el programa de fuerza bruta al cluster. Cada integrante corre un contenedor Docker igual, los contenedores se conectan por un router y juntos buscan la llave del texto cifrado de otro equipo.
 
 El programa es `bruteforce_fix.c`, la versión que cifra y descifra todo el texto. Todos los equipos modificaron el original así, para cifrar el texto completo y encontrar una frase en el texto ya descifrado.
 
-El enunciado pide el Dockerfile en la raíz del proyecto. Aquí está en `Parte2/Mac/` para tener junto todo el trabajo hecho en Mac. Si el profesor lo pide en la raíz, se mueve el Dockerfile y se cambia el contexto del build.
+El enunciado pide el Dockerfile en la raíz del proyecto. Aquí está en `Parte2/Imagen/` para tener junto todo el trabajo de la imagen, que usamos igual en Windows y en Mac. Si el profesor lo pide en la raíz, se mueve el Dockerfile y se cambia el contexto del build.
 
 ## Qué hay en la carpeta
 
@@ -36,7 +36,7 @@ SSH por contenedor y autoriza su propia publica para probar `ssh localhost`.
 Cada integrante corre esto desde la carpeta `Proyecto_2`.
 
 ```
-docker build -t mpi-cluster-image Parte2/Mac
+docker build -t mpi-cluster-image Parte2/Imagen
 ```
 
 ## 2. Validar la imagen

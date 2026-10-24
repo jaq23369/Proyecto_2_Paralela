@@ -1,7 +1,7 @@
 # Prueba Joel / Kevin
 
 Preparacion basada en `/Users/joel/Downloads/README_JOEL.md`, recibido el
-21/10/2026. Los resultados reales se registran en `Mac/BITACORA.md`.
+21/10/2026. Los resultados reales se registran en `Imagen/BITACORA.md`.
 Las nuevas funciones se implementaron en este repositorio porque el paquete
 adicional mencionado por ese README no estaba disponible.
 
@@ -11,7 +11,7 @@ Activar Docker Desktop > Settings > Resources > Network > Enable host networking
 Desde `Proyecto_2` (conservar `mpi_node`, que tiene las llaves anteriores):
 
 ```bash
-docker build -t mpi-cluster-image Parte2/Mac
+docker build -t mpi-cluster-image Parte2/Imagen
 docker run -d --network host --name mpi_cluster --hostname joel-cluster mpi-cluster-image
 docker exec mpi_cluster ssh -o BatchMode=yes localhost hostname
 docker exec mpi_cluster timeout 20 mpirun -np 2 /proyecto/mpi_prueba 1
