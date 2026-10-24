@@ -123,7 +123,7 @@ no se ejecuto MPI con un filtro LAN inexistente.
 Pendiente: nueva publica `kevin_cluster.pub`, intercambio manual de publicas,
 SSH por puerto 22 entre ambos nodos y comunicacion MPI distribuida. No se
 declara logrado el cluster fisico ni se calcula speedup con estas pruebas.
-Comandos de continuacion en `../PRUEBA_JOEL.md`; logs locales en `../.local/`.
+Logs locales en `../.local/`.
 
 
 ## Clúster entre Windows y Mac con Tailscale (23 de octubre de 2026)

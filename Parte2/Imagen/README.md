@@ -26,7 +26,7 @@ El enunciado pide el Dockerfile en la raíz del proyecto. Aquí está en `Parte2
 
 Docker Desktop 4.34 o superior, con "Enable host networking" en Settings, Resources, Network. Todas las computadoras del equipo en el mismo router.
 
-Para la sesion Joel/Kevin, ver `../PRUEBA_JOEL.md` y `../cluster_hosts.lan`.
+Para la sesion Joel/Kevin en la misma red, ver `../cluster_hosts.lan`.
 La imagen permanece activa por defecto (`sleep infinity`); para abrir una
 terminal usar `docker exec -it mpi_cluster bash`. El inicio genera una identidad
 SSH por contenedor y autoriza su propia publica para probar `ssh localhost`.

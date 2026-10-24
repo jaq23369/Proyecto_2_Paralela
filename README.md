@@ -18,7 +18,6 @@ Con 2168 bytes de texto, cada llave tarda unos 25 microsegundos en probarse en u
 | `Parte2/Imagen/` | Dockerfile, programas en C, texto de los grupos y bitácora de la imagen |
 | `Parte2/Tailscale/` | Capa extra para conectar contenedores de computadoras distintas |
 | `Parte2/foro/` | Entrada del foro con el texto cifrado de nuestro equipo |
-| `Parte2/PRUEBA_JOEL.md` | Guía de la prueba hecha en la misma red |
 
 ## Requisitos
 
