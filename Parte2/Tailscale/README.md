@@ -2,7 +2,7 @@
 
 Esta carpeta agrega una capa opcional encima de `mpi-cluster-image`. Si el contenedor recibe una clave de Tailscale, entra a una VPN y tiene su propia IP (empieza con 100.). Así dos contenedores en computadoras distintas, Windows y Mac, se ven entre ellos sin depender de la red host de Docker.
 
-Si no se pasa la clave, el contenedor arranca igual que la imagen base. Cuando estemos en el mismo router se puede seguir como en `Parte2/Mac/README.md`, aunque en Windows la red host de Docker Desktop no ve la tarjeta de red real, así que Tailscale puede seguir siendo la opción más segura.
+Si no se pasa la clave, el contenedor arranca igual que la imagen base. Cuando estemos en el mismo router se puede seguir como en `Parte2/Imagen/README.md`, aunque en Windows la red host de Docker Desktop no ve la tarjeta de red real, así que Tailscale puede seguir siendo la opción más segura.
 
 Radmin VPN no sirve para esto porque el contenedor no ve ese adaptador, y no tiene cliente para Mac.
 
@@ -18,7 +18,7 @@ Radmin VPN no sirve para esto porque el contenedor no ve ese adaptador, y no tie
 Desde la carpeta `Proyecto 2`.
 
 ```
-docker build -t mpi-cluster-image Parte2/Mac
+docker build -t mpi-cluster-image Parte2/Imagen
 docker build -t mpi-cluster-ts Parte2/Tailscale
 ```
 
@@ -80,17 +80,32 @@ docker exec mpi_ts mpirun --hostfile /proyecto/cluster_hosts --mca btl_tcp_if_in
 
 Se usa `tailscale0` en lugar de una subred porque es el nombre de la interfaz que crea Tailscale y es el mismo en las dos computadoras.
 
-## 6. Búsqueda distribuida con el texto del Grupo 9
+## 6. Búsqueda distribuida con el texto del Grupo 2
 
-El archivo está en la imagen de los dos. Kevin corre.
+El archivo `cruzado_grupo2/grupo2_cifrado.b64` viene en la imagen de los dos. Si algún nodo se construyó antes de que existiera, hay que copiarlo con `docker cp` y comprobar que el `md5sum` sea el mismo en los dos nodos.
+
+Primero el tiempo base local (Ts), con 4 procesos y sin hostfile.
 
 ```
-docker exec mpi_ts mpirun --hostfile /proyecto/cluster_hosts --mca btl_tcp_if_include tailscale0 --mca oob_tcp_if_include tailscale0 -np 8 /proyecto/bruteforce --b64 /proyecto/cruzado_grupo9/grupo9_cifrado.b64 --word "paralela y distribuida"
+docker exec mpi_ts mpirun -np 4 /proyecto/bruteforce --b64 /proyecto/cruzado_grupo2/grupo2_cifrado.b64 --word "memoria distribuida"
 ```
 
-Debe salir `Key = 3141592` con procesos de los dos nodos. El tiempo base local (Ts) está en `README_JOEL.md`, 82.0 s con 4 procesos en Windows. Para el speedup hay que comparar contra el mismo equipo y el mismo número de procesos, no contra la Mac.
+Después la búsqueda distribuida (Tp). Kevin corre.
 
-Con `-np 8` y los slots anteriores, MPI reparte 4 procesos por computadora.
+```
+docker exec mpi_ts mpirun --hostfile /proyecto/cluster_hosts --mca btl_tcp_if_include tailscale0 --mca oob_tcp_if_include tailscale0 -np 8 /proyecto/bruteforce --b64 /proyecto/cruzado_grupo2/grupo2_cifrado.b64 --word "memoria distribuida"
+```
+
+Las dos deben salir con `Key = 4206649`. Con `-np 8` y los slots anteriores, MPI reparte 4 procesos por computadora.
+
+Resultados de la prueba del 23 de octubre de 2026, con el nodo de Kevin (Windows) como maestro.
+
+| Corrida | Procesos | Nodos | Tiempo | Speedup |
+|---|---|---|---|---|
+| Local (Ts) | 4 | 1 | 106.594 s | 1.00 |
+| Distribuida (Tp) | 8 | 2 | 109.931 s | 0.97 |
+
+La llave está en el rango del proceso 0, que tiene que probar 4.2 millones de llaves sin importar cuántos procesos haya, por eso repartir la búsqueda no baja el tiempo. Con el texto del Grupo 9 (`--b64 /proyecto/cruzado_grupo9/grupo9_cifrado.b64 --word "paralela y distribuida"`, llave 3141592) pasó lo mismo, 82.013 s en local y 85.837 s distribuido. Para comparar hay que usar el mismo equipo y el mismo número de procesos en el Ts, no el tiempo de la Mac.
 
 ## Si algo falla
 

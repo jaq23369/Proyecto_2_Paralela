@@ -1,5 +1,5 @@
 # Imagen del cluster MPI para la Parte 2
-# Construir con:  docker build -t mpi-cluster-image Parte2/Mac
+# Construir con:  docker build -t mpi-cluster-image Parte2/Imagen
 FROM ubuntu:22.04
 
 # Que apt no haga preguntas durante la construccion
@@ -35,6 +35,7 @@ WORKDIR /proyecto
 COPY compat/ ./compat/
 COPY bruteforce_fix.c cifrar.c mpi_prueba.c texto_openmpi.txt cluster_hosts entrypoint.sh ./
 COPY cruzado_grupo9/ ./cruzado_grupo9/
+COPY cruzado_grupo2/ ./cruzado_grupo2/
 
 # Compilar con el reemplazo de OpenSSL. El binario se llama bruteforce.
 # Va sin optimizacion por el mismo motivo que en la Parte 1, el armado original
