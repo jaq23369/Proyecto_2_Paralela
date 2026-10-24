@@ -8,7 +8,7 @@ Equipo de prueba local, una Mac con Apple M3 Max (arm64), macOS 27.0.1, Docker 2
 
 | Qué | Resultado |
 |---|---|
-| `docker build -t mpi-cluster-image Parte2/Mac` | Funcionó. La imagen quedó armada con los paquetes del enunciado más libssl-dev |
+| `docker build -t mpi-cluster-image Parte2/Imagen` | Funcionó. La imagen quedó armada con los paquetes del enunciado más libssl-dev |
 
 ### Problema 1, Ubuntu 22.04 no trae rpc/des_crypt.h
 
@@ -124,3 +124,60 @@ Pendiente: nueva publica `kevin_cluster.pub`, intercambio manual de publicas,
 SSH por puerto 22 entre ambos nodos y comunicacion MPI distribuida. No se
 declara logrado el cluster fisico ni se calcula speedup con estas pruebas.
 Comandos de continuacion en `../PRUEBA_JOEL.md`; logs locales en `../.local/`.
+
+
+## Clúster entre Windows y Mac con Tailscale (23 de octubre de 2026)
+
+En clase las dos computadoras estaban en la misma Wi-Fi (10.100.0.0/19) y Kevin entró por SSH al contenedor de Joel por el puerto 2222. MPI entre las dos máquinas no se llegó a probar. Después, con red host, el contenedor de Joel solo veía la máquina virtual de Docker y no la LAN (tabla de arriba). Esta parte se terminó cada uno desde su casa, con Tailscale dentro de los contenedores. La imagen es la misma de esta carpeta y la capa de Tailscale está en `Parte2/Tailscale/`.
+
+Equipos de esta prueba.
+
+| Nodo | Equipo | Sistema | IP de Tailscale | slots y max_slots |
+|---|---|---|---|---|
+| kevin-node (maestro) | PC con Intel Core i5-12400, 6 núcleos y 12 hilos | Windows 11, Docker Desktop | 100.88.93.44 | 4 y 4 |
+| joel-node | MacBook Pro con Apple M3 Max | macOS, Docker Desktop | 100.68.142.84 | 4 y 4 |
+
+### Problema 4, Radmin VPN y la red host de Docker Desktop
+
+Qué falló. Se intentó primero Radmin VPN para simular la misma subred. El contenedor no ve el adaptador de Radmin y, además, no hay cliente para Mac. Con la red host de Docker Desktop en Windows el contenedor solo ve la máquina virtual (192.168.65.3), no la tarjeta Wi-Fi.
+
+Cómo se arregló. Se instaló Tailscale dentro de cada contenedor, con `--cap-add NET_ADMIN` y `--device /dev/net/tun`. Cada contenedor recibe una IP 100.x y la interfaz `tailscale0`, que se usa en `--mca btl_tcp_if_include` y `--mca oob_tcp_if_include` en lugar de una subred.
+
+### Problema 5, el entrypoint.sh con fin de línea de Windows
+
+Qué falló. Al construir la imagen en Windows, el `entrypoint.sh` quedó con CRLF y el contenedor no arrancaba, con el error `exec /proyecto/entrypoint.sh: no such file or directory`. Las validaciones del enunciado fallaban por eso.
+
+Cómo se arregló. Se agregó `sed -i 's/$//'` al Dockerfile, tanto el de la imagen como el de Tailscale, antes del `chmod +x`.
+
+### Problema 6, detalles al unir los nodos
+
+| Qué pasó | Cómo se resolvió |
+|---|---|
+| `ping` no existe en la imagen | Se usó `tailscale ping`, que ya viene con Tailscale |
+| El contenedor de Kevin no tenía llave SSH, porque se creó con una versión anterior de la imagen | Se generó con `ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa` y se pegó la pública de cada uno en el `authorized_keys` del otro |
+| `mpirun` dio `No se pudo leer el archivo` con el texto del Grupo 9 | Al nodo de Kevin le faltaba `cruzado_grupo9/`. Se copió el archivo y se comprobó con `md5sum` que fuera el mismo en los dos nodos. Después se agregó la carpeta al Dockerfile |
+| El archivo copiado desde Windows traía fin de línea CRLF y no era idéntico al de Joel | Se quitó el `` y los `md5sum` quedaron iguales |
+
+### Pruebas del clúster
+
+| Prueba | Resultado |
+|---|---|
+| `tailscale ping` entre los nodos | Responde, pero sin conexión directa. Pasa por el relay de Miami y tarda entre 118 y 274 ms |
+| `ssh -o BatchMode=yes root@<IP del otro> hostname` en los dos sentidos | Funcionó. Imprime `joel-node` y `kevin-node` sin contraseña |
+| `mpirun --hostfile cluster_hosts --map-by ppr:1:node -np 2 hostname` | Funcionó. Imprime `kevin-node` y `joel-node` |
+| Demo interna con la llave 2⁵⁵ y 2 procesos | Funcionó. El proceso 1, en `joel-node`, encontró la llave y avisó al maestro. Tiempo 0.125944 s |
+
+### Resultados con textos de otros equipos
+
+Todas las corridas con `bruteforce_fix` (armado corregido), el texto en base64 con `--b64` y el mismo comando de la Parte 2. El Ts es una corrida con 4 procesos en un solo nodo (Kevin, Windows) y el Tp es una corrida con 8 procesos, 4 en cada nodo.
+
+| Grupo | Palabra objetivo | Llave | Ts (4 procesos, 1 nodo) | Tp (8 procesos, 2 nodos) | Speedup |
+|---|---|---|---|---|---|
+| 9 (prueba) | paralela y distribuida | 3141592 | 82.013272 s | 85.837373 s | 0.96 |
+| 2 (el real) | memoria distribuida | 4206649 | 106.593799 s | 109.930869 s | 0.97 |
+
+La eficiencia del Grupo 2 con 8 procesos es 0.97 / 8 = 0.12. El Ts de 54.9 s de arriba es de la Mac y no se compara con estos, porque son equipos distintos.
+
+Por qué no hubo speedup. Las dos llaves están en el rango del proceso 0, que empieza en 0 y tiene que probar 4.2 millones de llaves (3.1 millones en el Grupo 9) sin importar cuántos procesos haya. Los otros procesos buscan en rangos donde la llave no está. Cada llave costó 25.3 µs en local y 26.1 µs en el clúster para el Grupo 2. Los 3.3 s de más pueden venir del arranque por SSH en el otro nodo y de la latencia del relay, pero no se midió por separado.
+
+Lo que quedaba pendiente en "Lo que falta probar en la red física" se hizo con Tailscale y no en la red del router. Queda sin probar la red física del mismo router y una llave que caiga en el rango de otro nodo, para ver un caso donde el clúster sí ayude.
